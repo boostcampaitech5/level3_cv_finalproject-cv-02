@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.param_functions import Depends
 from pydantic import BaseModel, Field
 from fastapi.responses import HTMLResponse
@@ -12,24 +12,33 @@ import os
 from datetime import datetime
 from app.predictor import seg, save_masked_image
 from PIL import Image
+import time
 app = FastAPI()
 
+class SegRequest(BaseModel):
+    x: int
+    y: int
+    file_name: str
 
 @app.post("/seg/")
-async def upload_file(data: str = Form(...)):
-    input_root = "/opt/ml/seg_app/app/input" 
-    save_root = "/opt/ml/seg_app/app/seg_db"
-    image_path = os.path.join(input_root, data)
+async def upload_file(request: Request, data: SegRequest):
+    file_name = data.file_name
+    x = data.x
+    y = data.y
+    input_root = "./app/input" 
+    save_root = "./app/seg_db"
+    image_path = os.path.join(input_root, file_name)
     image = Image.open(image_path)
     image = np.array(image)
-    masks, scores, logits = seg(image)
+
+    masks, scores, logits = seg(image,x,y)
 
     save_paths = []  # 저장된 파일 경로 리스트
-    
+
     for i in range(3):
         # 파일 이름과 확장자 분리
-        file_name, extension = os.path.splitext(data)
-        data_file_name = f"{file_name}_{i}{extension}"
+        name, extension = os.path.splitext(file_name)
+        data_file_name = f"{name}_{i+1}{extension}"
         save_path = os.path.join(save_root, data_file_name) 
         save_masked_image(image, masks[i], save_path)
         save_paths.append(save_path)  # 저장된 파일 경로 추가

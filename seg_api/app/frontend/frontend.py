@@ -15,15 +15,17 @@ def main():
     st.title("Segment clothes")
     st.markdown("---")
     st.header("Upload Image")
-
+    seg_state = False
     if "result" not in st.session_state:
         st.session_state["result"] = None
+        seg_state = True
     uploaded_file = st.file_uploader("파일을 업로드하세요.", type=["png", "jpg", "jpeg"])
-    if uploaded_file is not None:
+    if uploaded_file is not None and seg_state is None:
+        print("출력xxxxx")
         st.write("업로드된 파일:", uploaded_file.name)
         file_name = uploaded_file.name
         if st.button('Seg start!', key="start_bt"):
-            save_path = os.path.join("/opt/ml/seg_app/app/input", file_name)
+            save_path = os.path.join("./app/input", file_name)
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
