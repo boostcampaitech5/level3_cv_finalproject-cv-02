@@ -6,6 +6,13 @@ import sys
 from segment_anything import sam_model_registry, SamPredictor
 from PIL import Image
 import os
+import time
+
+## 모델 전역변수로 선언
+sam_checkpoint = './weights/sam_vit_h_4b8939.pth'
+model_type = "vit_h"
+device = "cuda"
+sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
 
 def show_mask(mask, ax, random_color=False):
     if random_color:
@@ -27,24 +34,20 @@ def show_box(box, ax):
     w, h = box[2] - box[0], box[3] - box[1]
     ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2))    
 
-def seg(image):
-    sam_checkpoint = './weights/sam_vit_h_4b8939.pth'
-    model_type = "vit_h"
+def seg(image,x,y):
     device = "cuda"
-
-    sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
     sam.to(device=device)
     predictor = SamPredictor(sam)
     predictor.set_image(image)
-    
-    input_point = np.array([[300, 500]]) ##임의로 설정 나중에 좌표값 포인트로 바꿔주기
+    input_point = np.array([[x, y]]) 
     input_label = np.array([1])
-
     masks, scores, logits = predictor.predict(
         point_coords=input_point,
         point_labels=input_label,
         multimask_output=True,
     )
+    predictor.set_image(image)
+
 
     return masks, scores, logits
 
@@ -59,4 +62,4 @@ def save_masked_image(image, mask, save_path):
     # 이미지 저장
     masked_image = Image.fromarray(masked_area)
     masked_image.save(save_path)
-    print("aaaaaaaaa")
+
