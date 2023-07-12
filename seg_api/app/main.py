@@ -11,9 +11,26 @@ import torch
 import os
 from datetime import datetime
 from app.predictor import seg, save_masked_image
+from segment_anything import sam_model_registry, SamPredictor
 from PIL import Image
 import time
+
 app = FastAPI()
+
+class SegRequest(BaseModel):
+    x: int
+    y: int
+    file_name: str
+
+def model_define():
+    sam_checkpoint = './weights/sam_vit_h_4b8939.pth'
+    model_type = "vit_h"
+    device = "cuda"
+    sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
+    sam.to(device=device)
+
+    return sam
+sam = model_define()
 
 class SegRequest(BaseModel):
     x: int
@@ -31,7 +48,8 @@ async def upload_file(request: Request, data: SegRequest):
     image = Image.open(image_path)
     image = np.array(image)
 
-    masks, scores, logits = seg(image,x,y)
+    masks, scores, logits = seg(sam,image,x,y)
+
 
     save_paths = []  # 저장된 파일 경로 리스트
 

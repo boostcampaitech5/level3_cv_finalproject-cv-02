@@ -8,11 +8,6 @@ from PIL import Image
 import os
 import time
 
-## 모델 전역변수로 선언
-sam_checkpoint = './weights/sam_vit_h_4b8939.pth'
-model_type = "vit_h"
-device = "cuda"
-sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
 
 def show_mask(mask, ax, random_color=False):
     if random_color:
@@ -34,9 +29,7 @@ def show_box(box, ax):
     w, h = box[2] - box[0], box[3] - box[1]
     ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2))    
 
-def seg(image,x,y):
-    device = "cuda"
-    sam.to(device=device)
+def seg(sam,image,x,y):
     predictor = SamPredictor(sam)
     predictor.set_image(image)
     input_point = np.array([[x, y]]) 
@@ -47,7 +40,6 @@ def seg(image,x,y):
         multimask_output=True,
     )
     predictor.set_image(image)
-
 
     return masks, scores, logits
 
