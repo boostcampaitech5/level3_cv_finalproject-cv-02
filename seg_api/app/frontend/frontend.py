@@ -50,6 +50,7 @@ def main():
 
         value = streamlit_image_coordinates(
                 image,
+
                 key = "lacal2"
             )
 
