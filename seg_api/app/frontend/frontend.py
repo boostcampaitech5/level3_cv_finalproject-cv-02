@@ -39,9 +39,7 @@ def main():
             image = image.resize((600, 600))
             print("resize 이후",image.size)
         image.save(save_path)
-        image_path = "/opt/ml/seg_api/app/input/KakaoTalk_20230711_043414484_04.jpg"
-
-        image = Image.open(image_path)
+        image = Image.open(save_path)
 
         st.session_state["save_path"] = save_path
         st.markdown("<div style='display: flex; justify-content: center; align-items: center;'> \
