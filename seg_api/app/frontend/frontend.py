@@ -43,7 +43,6 @@ def main():
         print("이미지 오픈3",time.time())
         value = streamlit_image_coordinates(
                 save_path,
-
                 key = "lacal2"
             )
 

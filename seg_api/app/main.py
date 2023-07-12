@@ -17,6 +17,10 @@ import time
 
 app = FastAPI()
 
+class SegRequest(BaseModel):
+    x: int
+    y: int
+    file_name: str
 
 def model_define():
     sam_checkpoint = './weights/sam_vit_h_4b8939.pth'
@@ -45,6 +49,7 @@ async def upload_file(request: Request, data: SegRequest):
     image = np.array(image)
 
     masks, scores, logits = seg(sam,image,x,y)
+
 
     save_paths = []  # 저장된 파일 경로 리스트
 
