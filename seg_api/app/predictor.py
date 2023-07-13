@@ -46,6 +46,7 @@ def seg(predictor,image,x,y):
 def save_masked_image(image, mask, save_path):
     # 마스크 이진화
     binary_mask = (mask > 0).astype(np.uint8)
+    print(mask.shape)
 
     # 마스크가 있는 부분 추출
     masked_area = image * binary_mask[:, :, np.newaxis]
