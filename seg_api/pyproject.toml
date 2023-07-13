@@ -6,7 +6,7 @@ authors = ["DaHyeonnn"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "3.8.5"
 fastapi = ">=0.99.1,<0.100.0"
 uvicorn = "^0.22.0"
 pydantic = ">=1.7.4,<1.8 || >1.8,<1.8.1 || >1.8.1,<2.0.0"
@@ -15,7 +15,7 @@ albumentations = "^1.1.0"
 torchvision = "^0.10.1"
 requests = "^2.26.0"
 gunicorn = "^20.1.0"
-streamlit = "1.2.0"
+streamlit = "1.19.0"
 opencv-python-headless = "4.5.1.48"
 altair = "<5"
 opencv-python = "^4.8.0.74"
@@ -25,6 +25,7 @@ protobuf = "3.20.2"
 streamlit-image-coordinates = "^0.1.5"
 onnxruntime = "^1.15.1"
 onnx = "^1.14.0"
+streamlit-image-select = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

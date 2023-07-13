@@ -11,7 +11,7 @@ import streamlit as st
 import requests
 import os
 from streamlit_image_coordinates import streamlit_image_coordinates
-
+from streamlit_image_select import image_select
 
 def main():
     st.title("Segment clothes")
@@ -36,7 +36,7 @@ def main():
         width, height = image.size
         if width > 1000 or height > 1000: # 이미지 크기 조정
             print("resize 이전",image.size)
-            image = image.resize((600, 600))
+            image = image.resize((800, 1000))
             print("resize 이후",image.size)
         image.save(save_path)
         image = Image.open(save_path)
@@ -69,32 +69,43 @@ def main():
 
     if st.session_state["result"] is not None:
         uploaded_file = None
-        result = st.session_state["result"] 
-        columns = st.columns(3)  # 3개의 컬럼 생성
-        for i, path in enumerate(result):
-            image = Image.open(path)
-            with columns[i % 3]:
-                file_name = os.path.basename(path)
-                st.image(image, caption=f"{i+1} : {file_name}")
-        st.header("Choose Inference Image")
-        text_input = st.text_input("원하는 이미지를 입력하세요. [ex.1]")
-        submit_pressed = False
-        if st.button("Submit", key="final_bt"):
-            submit_pressed = True
-        if text_input or submit_pressed:
-            try:
-                print(f"{text_input}번째 이미지 선택함")
-                if int(text_input) <= 0:
-                    st.error("상품 번호를 잘못 입력하셨습니다.")
-                else:
-                    final_seg_path = result[int(text_input) - 1]
-                    response2 = requests.post("http://localhost:8555/re/", data={"data": final_seg_path})
-                    st.success("success")
-                    st.write(f"확인용 : output - {final_seg_path} ")
+        # result = st.session_state["result"] 
+        # columns = st.columns(3)  # 3개의 컬럼 생성
+        # for i, path in enumerate(result):
+        #     image = Image.open(path)
+        #     with columns[i % 3]:
+        #         file_name = os.path.basename(path)
+        #         st.image(image, caption=f"{i+1} : {file_name}")
+        # st.header("Choose Inference Image")
+        # text_input = st.text_input("원하는 이미지를 입력하세요. [ex.1]")
+        # submit_pressed = False
+        # if st.button("Submit", key="final_bt"):
+        #     submit_pressed = True
+        # if text_input or submit_pressed:
+        #     try:
+        #         print(f"{text_input}번째 이미지 선택함")
+        #         if int(text_input) <= 0:
+        #             st.error("상품 번호를 잘못 입력하셨습니다.")
+        #         else:
+        #             final_seg_path = result[int(text_input) - 1]
+        #             response2 = requests.post("http://localhost:8555/re/", data={"data": final_seg_path})
+        #             st.success("success")
+        #             st.write(f"확인용 : output - {final_seg_path} ")
                     
-                    print(final_seg_path)
-            except IndexError:
-                st.error("상품 번호를 잘못 입력하셨습니다.")
+        #             print(final_seg_path)
+        #     except IndexError:
+        #         st.error("상품 번호를 잘못 입력하셨습니다.")
+        img = image_select(
+            label = "원하는 이미지를 선택하세요",
+            images = st.session_state["result"],
+            captions = ["1","2","3"],
+            use_container_width = False
+        )
+        print("이미지 선택 완료")
+        final_seg_path = img
+        response2 = requests.post("http://localhost:8555/re/", data={"data": final_seg_path})
+        st.success("success")
+        st.write(f"확인용 : output - {final_seg_path} ")
 
 
 
