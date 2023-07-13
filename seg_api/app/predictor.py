@@ -50,7 +50,24 @@ def save_masked_image(image, mask, save_path):
     # 마스크가 있는 부분 추출
     masked_area = image * binary_mask[:, :, np.newaxis]
 
+    #bbox 추출
+    seg_value=1
+    bbox = 0,0,0,0
+    np_seg = np.array(mask)
+    segmentation = np.where(np_seg == seg_value)
+    if len(segmentation) != 0 and len(segmentation[1]) != 0 and len(segmentation[0]) != 0:
+        x_min = int(np.min(segmentation[1]))
+        x_max = int(np.max(segmentation[1]))
+        y_min = int(np.min(segmentation[0]))
+        y_max = int(np.max(segmentation[0]))
+
+        bbox = x_min, x_max, y_min, y_max
+
+    #crop image
+    cropped_image = masked_area[y_min:y_max, x_min:x_max]
+    
+
     # 이미지 저장
-    masked_image = Image.fromarray(masked_area)
+    masked_image = Image.fromarray(cropped_image)
     masked_image.save(save_path)
 
