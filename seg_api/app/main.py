@@ -57,7 +57,7 @@ async def upload_file(request: Request, data: SegRequest):
     image = Image.open(image_path)
     image = np.array(image)
     start = time.time()
-    masks  = seg(predictor, ort_session,image,x,y) #mask, score, logit
+    masks  = seg(predictor,image,x,y) #mask, score, logit
     end = time.time()
     print(f"seg time : {end-start} sec")
 
