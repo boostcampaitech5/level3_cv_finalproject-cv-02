@@ -14,7 +14,11 @@ from app.predictor import seg, save_masked_image
 from segment_anything import sam_model_registry, SamPredictor
 from PIL import Image
 import time
-
+import warnings
+import onnxruntime
+from onnxruntime.quantization import QuantType
+from onnxruntime.quantization.quantize import quantize_dynamic
+from segment_anything.utils.onnx import SamOnnxModel
 app = FastAPI()
 
 class SegRequest(BaseModel):
@@ -28,9 +32,14 @@ def model_define():
     device = "cuda"
     sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
     sam.to(device=device)
+    predictor = SamPredictor(sam)
 
-    return sam
-sam = model_define()
+    onnx_model_path = "/opt/ml/level3_cv_finalproject-cv-02-1/seg_api/weights/sam_onnx_quantized_example.onnx"
+    ort_session = onnxruntime.InferenceSession(onnx_model_path)
+
+
+    return predictor, ort_session 
+predictor, ort_session = model_define()
 
 class SegRequest(BaseModel):
     x: int
@@ -47,9 +56,10 @@ async def upload_file(request: Request, data: SegRequest):
     image_path = os.path.join(input_root, file_name)
     image = Image.open(image_path)
     image = np.array(image)
-
-    masks, scores, logits = seg(sam,image,x,y)
-
+    start = time.time()
+    masks  = seg(predictor, ort_session,image,x,y) #mask, score, logit
+    end = time.time()
+    print(f"seg time : {end-start} sec")
 
     save_paths = []  # 저장된 파일 경로 리스트
 

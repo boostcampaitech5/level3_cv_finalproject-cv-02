@@ -15,13 +15,16 @@ albumentations = "^1.1.0"
 torchvision = "^0.10.1"
 requests = "^2.26.0"
 gunicorn = "^20.1.0"
-streamlit = "1.1.0"
+streamlit = "1.2.0"
 opencv-python-headless = "4.5.1.48"
 altair = "<5"
 opencv-python = "^4.8.0.74"
 matplotlib = "^3.7.2"
 segment-anything = {git = "https://github.com/facebookresearch/segment-anything.git"}
-protobuf = "3.20.0"
+protobuf = "3.20.2"
+streamlit-image-coordinates = "^0.1.5"
+onnxruntime = "^1.15.1"
+onnx = "^1.14.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

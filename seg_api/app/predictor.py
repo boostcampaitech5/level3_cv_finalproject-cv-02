@@ -7,6 +7,11 @@ from segment_anything import sam_model_registry, SamPredictor
 from PIL import Image
 import os
 import time
+import warnings
+import onnxruntime
+from onnxruntime.quantization import QuantType
+from onnxruntime.quantization.quantize import quantize_dynamic
+from segment_anything.utils.onnx import SamOnnxModel
 
 
 def show_mask(mask, ax, random_color=False):
@@ -29,19 +34,45 @@ def show_box(box, ax):
     w, h = box[2] - box[0], box[3] - box[1]
     ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2))    
 
-def seg(sam,image,x,y):
-    predictor = SamPredictor(sam)
+def seg(predictor,ort_session,image,x,y):
+    
     predictor.set_image(image)
     input_point = np.array([[x, y]]) 
     input_label = np.array([1])
-    masks, scores, logits = predictor.predict(
-        point_coords=input_point,
-        point_labels=input_label,
-        multimask_output=True,
-    )
-    predictor.set_image(image)
+    image_embedding = predictor.get_image_embedding().cpu().numpy()
 
-    return masks, scores, logits
+    onnx_coord = np.concatenate([input_point, np.array([[0.0, 0.0]])], axis=0)[None, :, :]
+    onnx_label = np.concatenate([input_label, np.array([-1])], axis=0)[None, :].astype(np.float32)
+    onnx_coord = predictor.transform.apply_coords(onnx_coord, image.shape[:2]).astype(np.float32)
+
+    onnx_mask_input = np.zeros((1, 1, 256, 256), dtype=np.float32)
+    onnx_has_mask_input = np.zeros(1, dtype=np.float32)
+
+    ort_inputs = {
+    "image_embeddings": image_embedding,
+    "point_coords": onnx_coord,
+    "point_labels": onnx_label,
+    "mask_input": onnx_mask_input,
+    "has_mask_input": onnx_has_mask_input,
+    "orig_im_size": np.array(image.shape[:2], dtype=np.float32)
+    }
+    
+    masks, scores, _ = ort_session.run(None, ort_inputs)
+    
+    masks = masks > predictor.model.mask_threshold
+    masks=np.squeeze(masks, axis=0)
+    scores=np.squeeze(scores, axis=0)
+
+    ms = []
+    for mask, score in zip(masks, scores) :
+        ms.append([mask, score])
+
+    ms.sort(key = lambda x : x[1], reverse = True)
+    
+
+    return list(x[0] for x in ms)
+
+
 
 
 def save_masked_image(image, mask, save_path):
@@ -49,7 +80,7 @@ def save_masked_image(image, mask, save_path):
     binary_mask = (mask > 0).astype(np.uint8)
 
     # 마스크가 있는 부분 추출
-    masked_area = image * binary_mask[:, :, np.newaxis]
+    masked_area = image * binary_mask[:,:, np.newaxis]
 
     # 이미지 저장
     masked_image = Image.fromarray(masked_area)
