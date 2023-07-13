@@ -57,7 +57,7 @@ async def upload_file(request: Request, data: SegRequest):
     image = Image.open(image_path)
     image = np.array(image)
     start = time.time()
-    masks  = seg(predictor,image,x,y) #mask, score, logit
+    masks,_,_  = seg(predictor,image,x,y) #mask, score, logit
     end = time.time()
     print(f"seg time : {end-start} sec")
 
@@ -68,6 +68,7 @@ async def upload_file(request: Request, data: SegRequest):
         name, extension = os.path.splitext(file_name)
         data_file_name = f"{name}_{i+1}{extension}"
         save_path = os.path.join(save_root, data_file_name) 
+        
         save_masked_image(image, masks[i], save_path)
         save_paths.append(save_path)  # 저장된 파일 경로 추가
 
