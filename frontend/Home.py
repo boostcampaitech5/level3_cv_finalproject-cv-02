@@ -10,10 +10,20 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 
 # custom-modules
+from utils import init_session_state
 
+# built-in library
+import yaml
+from yaml.loader import SafeLoader
 
 
 if __name__ == "__main__":
+    # api별 ip 주소를 session state에 등록
+    with open("./api_address.yaml") as file:
+        api_address = yaml.load(file, Loader=SafeLoader)
+
+    init_session_state(list(api_address.items()))
+
     # 프로젝트 제목
     st.title(":shirt: 쇼핑의 기본, \"멋탠다드\"")
     st.markdown("---")
