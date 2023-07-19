@@ -1,0 +1,15 @@
+# 회원가입 시 사용자의 정보가 여기 저장됩니다.
+# 기본 형태를 보여주기 위해 작성되었고, 실제 계정 정보가 업데이트되면 push하지 않아야 합니다.
+cookie:
+  expiry_days: 0
+  key: random_signature_key
+  name: random_cookie_name
+credentials:
+  usernames:
+    noname:
+      email: noname@gmail.com
+      name: No Name
+      password: $2b$12$4LM6Q7TnH4PaN/amrNJ/Uu1sVipMwY4AQp//3MhZeLM7B6lNwHszu
+preauthorized:
+  emails:
+  - melsby@gmail.com
