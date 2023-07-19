@@ -2,5 +2,7 @@ __pycache__
 .empty
 
 # frontend
+frontend/accounts.yaml
+frontend/api_address.yaml
 
 # backend
