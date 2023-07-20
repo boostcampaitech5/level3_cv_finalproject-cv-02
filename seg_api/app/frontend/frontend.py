@@ -63,7 +63,7 @@ def main():
                 "file_name": file_name
             }
             st.session_state["x"],st.session_state["y"] = x,y
-            response = requests.post("http://localhost:8555/seg/",  json=data)
+            response = requests.post("http://localhost:30007/seg/",  json=data)
             result = response.json()
             print(result[0])
             st.session_state["result"] = result
