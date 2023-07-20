@@ -28,7 +28,7 @@ def main():
         st.session_state["save_path"] = None
 
     uploaded_file = st.file_uploader("파일을 업로드하세요.", type=["png", "jpg", "jpeg"])
-    if uploaded_file is not None :#and st.session_state["x"] is None:
+    if uploaded_file is not None: #and st.session_state["x"] is None:
         file_name = uploaded_file.name
         save_path = os.path.join("./app/input", file_name)
         # 이미지 열기
@@ -36,7 +36,7 @@ def main():
         width, height = image.size
         if width > 1000 or height > 1000: # 이미지 크기 조정
             print("resize 이전",image.size)
-            image = image.resize((700, 800)) ## 상의 후 나중에 바꾸기
+            image = image.resize((700, 1000))
             print("resize 이후",image.size)
         image.save(save_path)
         
@@ -49,32 +49,35 @@ def main():
 
         value = streamlit_image_coordinates(
                 image,
-                key = "lacal2"
+                key = "local"
             )
 
-        if value is not None:
-            print("aaaaaaaaaaaaaa")
-            x = value['x']
-            y = value['y']
-            print(x,y)
-            data = {
-                "x": x,
-                "y": y,
-                "file_name": file_name
-            }
-            st.session_state["x"],st.session_state["y"] = x,y
-            response = requests.post("http://localhost:8555/seg/",  json=data)
-            result = response.json()
-            print(result[0])
-            st.session_state["result"] = result
-            st.success("서버 전송 완료")
         
-            st.header("Choose Inference Image")
-            img = image_select("원하는 이미지를 선택해주세요", result)#st.session_state["result"])#[0], st.session_state["result"][1], st.session_state["result"][2]])
-            print(f"{img} 선택")
-            st.success("success")
-            #response2 = requests.post("http://localhost:8555/re/", data={"data": img})
+        x = value['x']
+        y = value['y']
+        print(x,y)
+        data = {
+            "x": x,
+            "y": y,
+            "file_name": file_name
+        }
+        st.session_state["x"],st.session_state["y"] = x,y
+        response = requests.post("http://localhost:30006/seg/",  json=data)
+        result = response.json()
+        st.session_state["result"] = result
+        st.session_state["save_path"] = None
+        st.success("서버 전송 완료")
+
+            # if st.session_state["result"] is not None:
+            #     uploaded_file = None
+            #     result = st.session_state["result"] 
         
+        st.header("Choose Inference Image")
+        img = image_select("원하는 이미지를 선택해주세요", [result[0], result[1], result[2]])
+        print(f"{img} 선택")
+        st.success(f"{img[-5]} 선택 완료")
+        response2 = requests.post("http://localhost:30006/re/", data={"data": img})
+    
 
 
 
