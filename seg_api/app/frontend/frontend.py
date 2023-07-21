@@ -67,10 +67,18 @@ def main():
             sel_img = []
             for i in range(len(result)) :
                 re_img = Image.open(result[i])
-                sz = max(re_img.size[0], re_img.size[1])
-                new_img = Image.new(re_img.mode, (sz, sz), (0,0,0))
-                new_img.paste(re_img)
-                sel_img.append(new_img)
+                if re_img.size[0] > re_img.size[1] : 
+                    sz = re_img.size[0]
+                    new_img = Image.new(re_img.mode, (sz, sz), (0,0,0))
+                    new_img.paste(re_img,(0,int((re_img.size[0]-re_img.size[1])/2)))
+                    sel_img.append(new_img)
+                else :
+                    sz = re_img.size[1]
+                    new_img = Image.new(re_img.mode, (sz, sz), (0,0,0))
+                    new_img.paste(re_img, (int((re_img.size[1]-re_img.size[0])/2),0))
+                    sel_img.append(new_img)
+                
+                
 
 
             st.header("Choose Inference Image")
