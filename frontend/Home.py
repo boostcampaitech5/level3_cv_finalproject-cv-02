@@ -1,33 +1,20 @@
-# Seg랑 검색은 하나의 흐름으로 이루어지니깐, 상품 검색 탭으로 빼두기.
 # 상품 검색 탭에서 검색 결과가 나왔을 때, 하나를 선택하여 입어보기를 누르면 생성 페이지로 이동
 # 생성 페이지에서는 선택한 상품 이미지가 보여야 하며, 사용자 사진을 업로드해야 함.
 # 상품 이미지와 사용자 사진이 업로드되면 생성 시작.
 
 # streamlit
 import streamlit as st
-
-# streamlit-extras(streamlit에는 없는 다양한 부가 기능들을 위해 사용)
 from streamlit_extras.switch_page_button import switch_page
 
 # custom-modules
-from utils import ManageSessionState
+from utils.management import ManageSessionState as MSS
 
-# built-in library
-import yaml
-from yaml.loader import SafeLoader
-
-
-# session state 관리는 ManageSessionState를 이용
-home_session_state = ManageSessionState()
+# api 주소 및 accounts 정보를 session state에 등록 (Home에서 한 번만)
+base_session_state = MSS(api_address_path="./api_address.yaml",
+                         accounts_path="./accounts.yaml")
 
 
 if __name__ == "__main__":
-    # api별 ip 주소를 session state에 등록
-    with open("./api_address.yaml") as file:
-        api_address = yaml.load(file, Loader=SafeLoader)
-
-    home_session_state.init_session_state(list(api_address.items()))
-
     # 프로젝트 제목
     st.title(":shirt: 쇼핑의 기본, \"멋탠다드\"")
     st.markdown("---")
