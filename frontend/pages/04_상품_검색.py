@@ -1,6 +1,8 @@
 # streamlit
 import streamlit as st
-from streamlit_extras.streamlit_image_coordinates import streamlit_image_coordinates
+# from streamlit_extras.streamlit_image_coordinates import streamlit_image_coordinates
+# from streamlit_image_select import image_select
+from streamlit_image_coordinates import streamlit_image_coordinates
 from streamlit_image_select import image_select
 
 # external-library
@@ -49,14 +51,26 @@ if __name__ == "__main__":
                 
                 # segmentation api 호출
                 files = {"img": img_bytes}
-                response = requests.post(f"{st.sessesion_state.segmentation}/seg?x={x}&y={y}", files=files)
+                # response = requests.post(f"{st.sessesion_state.segmentation}/seg?x={x}&y={y}", files=files)
+                response = requests.post(f"http://49.50.164.40:30006/seg?x={coordinates['x']}&y={coordinates['y']}", files=files)
                 
                 segmented_imgs = []
                 bytes_list = response.json()
                 for bytes_data in bytes_list:
                     image_data = base64.b64decode(bytes_data)                
                     image = Image.open(io.BytesIO(image_data))
-                    segmented_imgs.append(image)
+                    if image.size[0] > image.size[1] : 
+                        sz = image.size[0]
+                        new_img = Image.new(image.mode, (sz, sz), (0,0,0))
+                        new_img.paste(image,(0,int((image.size[0]-image.size[1])/2)))
+                    else :
+                        sz = image.size[1]
+                        new_img = Image.new(image.mode, (sz, sz), (0,0,0))
+                        new_img.paste(image, (int((image.size[1]-image.size[0])/2),0))
+                    segmented_imgs.append(new_img)
+                
+
+    
 
                 st.success('서버 전송 완료', icon="✅")
                 
