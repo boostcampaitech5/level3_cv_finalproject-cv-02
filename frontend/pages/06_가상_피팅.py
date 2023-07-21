@@ -6,5 +6,5 @@ if __name__ == "__main__":
     if st.session_state.authentication_status == True:
         pass
     else:
-        st.header("로그인 후 이용해주세요.")
+        st.subheader("가상 피팅 서비스는 오픈 준비중입니다! :person_doing_cartwheel:")
     
