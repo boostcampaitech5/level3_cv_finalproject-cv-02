@@ -10,11 +10,15 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 
 # custom-modules
-from utils import init_session_state
+from utils import ManageSessionState
 
 # built-in library
 import yaml
 from yaml.loader import SafeLoader
+
+
+# session state 관리는 ManageSessionState를 이용
+home_session_state = ManageSessionState()
 
 
 if __name__ == "__main__":
@@ -22,7 +26,7 @@ if __name__ == "__main__":
     with open("./api_address.yaml") as file:
         api_address = yaml.load(file, Loader=SafeLoader)
 
-    init_session_state(list(api_address.items()))
+    home_session_state.init_session_state(list(api_address.items()))
 
     # 프로젝트 제목
     st.title(":shirt: 쇼핑의 기본, \"멋탠다드\"")

@@ -8,7 +8,10 @@ import yaml
 from yaml.loader import SafeLoader
 
 # custom-modules
-from utils import init_session_state
+from utils import ManageSessionState
+
+
+login_session_state = ManageSessionState()
 
 
 if __name__ == "__main__":
@@ -26,8 +29,8 @@ if __name__ == "__main__":
     )
 
     # 필요한 sesion state 초기화
-    init_session_state([('accounts', accounts),
-                        ('authenticator', authenticator)])
+    login_session_state.init_session_state([('accounts', accounts),
+                                            ('authenticator', authenticator)])
     
     # name, authentication_status, username, logout은 authenticator 객체를 선언할 때 자동으로 session state에 등록됨.
     name, authentication_status, username = st.session_state.authenticator.login('로그인', 'main')
