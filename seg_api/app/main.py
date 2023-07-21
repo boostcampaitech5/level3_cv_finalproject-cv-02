@@ -19,6 +19,8 @@ import onnxruntime
 from onnxruntime.quantization import QuantType
 from onnxruntime.quantization.quantize import quantize_dynamic
 from segment_anything.utils.onnx import SamOnnxModel
+import random
+
 app = FastAPI()
 
 class SegRequest(BaseModel):
@@ -55,6 +57,7 @@ async def upload_file(request: Request, data: SegRequest):
     save_root = "./app/seg_db"
     image_path = os.path.join(input_root, file_name)
     image = Image.open(image_path)
+    image = image.convert("RGB")
     image = np.array(image)
     start = time.time()
     masks,_,_  = seg(predictor, image,x,y) #mask, score, logit
@@ -65,8 +68,9 @@ async def upload_file(request: Request, data: SegRequest):
 
     for i in range(3):
         # 파일 이름과 확장자 분리
+        rand = random.randint(0,1000)
         name, extension = os.path.splitext(file_name)
-        data_file_name = f"{name}_{i+1}{extension}"
+        data_file_name = f"{name}_{i+1}{rand}{extension}"
         save_path = os.path.join(save_root, data_file_name) 
         save_masked_image(image, masks[i], save_path)
         save_paths.append(save_path)  # 저장된 파일 경로 추가

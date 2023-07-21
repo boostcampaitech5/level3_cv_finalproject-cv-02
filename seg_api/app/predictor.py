@@ -30,6 +30,8 @@ def show_box(box, ax):
     ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2))    
 
 def seg(predictor,image,x,y):
+     
+
     predictor.set_image(image)
     input_point = np.array([[x, y]]) 
     input_label = np.array([1])
@@ -65,8 +67,9 @@ def save_masked_image(image, mask, save_path):
 
     #crop image
     cropped_image = masked_area[y_min:y_max, x_min:x_max]
-    
-
+    # print(f"crop :{cropped_image.shape}")
+    # image = cropped_image.convert("RGB") 
+    # print(f"rgb : {image.shape}")
     # 이미지 저장
     masked_image = Image.fromarray(cropped_image)
     masked_image.save(save_path)

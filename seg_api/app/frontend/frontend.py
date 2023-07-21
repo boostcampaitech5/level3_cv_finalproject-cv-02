@@ -2,14 +2,10 @@ import requests
 import streamlit as st
 import os
 from PIL import Image
-
-import streamlit as st
-import requests
 import time
+import cv2
+import numpy as np
 
-import streamlit as st
-import requests
-import os
 from streamlit_image_coordinates import streamlit_image_coordinates
 from streamlit_image_select import image_select
 
@@ -63,14 +59,22 @@ def main():
                 "file_name": file_name
             }
             st.session_state["x"],st.session_state["y"] = x,y
-            response = requests.post("http://localhost:30007/seg/",  json=data)
+            response = requests.post("http://localhost:30006/seg/",  json=data)
             result = response.json()
-            print(result[0])
+            
             st.session_state["result"] = result
             st.success("서버 전송 완료")
-        
+            sel_img = []
+            for i in range(len(result)) :
+                re_img = Image.open(result[i])
+                sz = max(re_img.size[0], re_img.size[1])
+                new_img = Image.new(re_img.mode, (sz, sz), (0,0,0))
+                new_img.paste(re_img)
+                sel_img.append(new_img)
+
+
             st.header("Choose Inference Image")
-            img = image_select("원하는 이미지를 선택해주세요", result)#st.session_state["result"])#[0], st.session_state["result"][1], st.session_state["result"][2]])
+            img = image_select("원하는 이미지를 선택해주세요", sel_img, use_container_width = False)#st.session_state["result"])#[0], st.session_state["result"][1], st.session_state["result"][2]])
             print(f"{img} 선택")
             st.success("success")
             #response2 = requests.post("http://localhost:8555/re/", data={"data": img})
