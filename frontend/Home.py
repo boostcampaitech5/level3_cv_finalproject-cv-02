@@ -12,6 +12,7 @@ from utils.management import ManageSessionState as MSS
 # api 주소 및 accounts 정보를 session state에 등록 (Home에서 한 번만)
 base_session_state = MSS(api_address_path="./api_address.yaml",
                          accounts_path="./accounts.yaml")
+MSS.init_session_state([("seg_select_state", False)])
 
 
 if __name__ == "__main__":
