@@ -108,4 +108,57 @@ class MeotandardRetrieval(Meotandard):
 class MeotandardViton(Meotandard):
     def __init__(self):
         super(MeotandardViton, self).__init__()
-        pass
+    
+    @st.cache_data
+    def querying_saveimg_api(_self, img_bytes: bytes, mode: str = 'cloth') -> tuple:
+        """img_bytes를 기반으로 생성 서버의 로컬 스토리지에 이미지 저장을 요청합니다.
+
+        Args:
+            img_bytes (bytes): bytes 형식의 사람 혹은 상품 데이터
+
+        Returns:
+            tuple: 데이터가 올바르게 저장되었는지를 나타내는 상태와 이미지의 이름을 반환합니다.
+        """
+        files = {"img": img_bytes}
+        data = {"mode": mode}
+        response = requests.post(url=f"{_self.viton_api_adrress}/proxy/save", files=files, data=data)
+        
+        save_state, im_name = response.json()['save_state'], response.json()['im_name']
+
+        return (save_state, im_name)
+
+    @st.cache_data
+    def querying_ppcloth_api(_self, img_name: str) -> str:
+        """생성 서버의 스토리지에 저장된 상품 이미지의 이름을 바탕으로 masking을 요청합니다.
+
+        Args:
+            img_name (str): 생성 서버의 스토리지에 저장된 상품 이미지의 이름
+
+        Returns:
+            str: 데이터가 올바르게 저장되었는지를 나타내는 상태 반환
+        """
+        data = {"img_name": img_name}
+        response = requests.post(url=f"{_self.viton_api_adrress}/proxy/preprocess/cloth", data=data)
+
+        return response.text
+    
+    @st.cache_data
+    def querying_ppperson_api(_self, img_name: str, model: str = 'ladi-vton') -> dict:
+        """생성 서버의 스토리지에 저장된 사람 이미지의 이름을 바탕으로, 생성에 필요한
+        모든 전처리를 요청합니다.
+
+        Args:
+            img_name (str): 생성 서버의 스토리지에 저장된 사람 이미지의 이름
+
+        Returns:
+            dict: 모든 전처리의 
+        """
+        available_model = ['hr-viton', 'ladi-vton']
+        if model not in available_model:
+            print(f"해당 모델은 지원하지 않습니다. 현재 지원하는 모델은 {available_model} 입니다.")
+            raise
+
+        data = {"img_name": img_name, "model": model}
+        response = requests.post(url=f"{_self.viton_api_adrress}/proxy/preprocess/person", data=data)
+
+        return response.json

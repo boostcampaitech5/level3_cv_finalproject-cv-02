@@ -11,7 +11,8 @@ import requests
 # custom-modules
 from meotandard_apis import MeotandardRetrieval
 from utils.management import ManageSessionState as MSS
-from utils.move import prev, next, open_page
+from utils.move import prev, next
+from utils.open import open_page
 from datas.cloth import SearchedCloth
 
 # 필요한 session state 초기화
