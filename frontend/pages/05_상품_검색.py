@@ -42,7 +42,7 @@ if __name__ == "__main__":
             clothes_metadata = meotandard_retrieval.querying_searchbyfilter_api(st.session_state.segmented_byte_img, text)
 
             # TODO: clothes_metadata가 제대로 return되지 않았을 때 예외처리가 필요
-            # TODO: 이미지 크기가 달라지면 button 위치가 자꾸 변하는 문제 해결
+            # TODO: 이미지 크기가 달라지면 button 위치가 자꾸 변하는 문제
             # TODO: next, prev를 통해 이미지를 이동하면 처음부터 코드가 실행됨 -> 캐싱 혹은 별도로 페이지 만드는 것을 고려
             if clothes_metadata:
                 searched_cloth = [SearchedCloth(cloth_metadata) for cloth_metadata in clothes_metadata]
@@ -78,24 +78,6 @@ if __name__ == "__main__":
                     # 이미지 시각화
                     with st.columns([0.1, 0.8, 0.1])[1]:
                         st.image(cloth.img_link, use_column_width=True)
-
-            # st.header("상품 검색 결과입니다!")
-            # st.subheader("(상품 이미지를 클릭하면 구매 링크로 이동합니다 :airplane_departure:)")
-            # st.markdown('---')
-
-            # # 2 x 5 그리드 형식으로 이미지 보여주기
-            # for i in range(2):
-            #     cols = st.columns(5)
-
-            #     for j in range(5):
-            #         idx = i * 5 + j
-
-            #         cloth_metadata = clothes_metadata[idx]
-            #         img_url = cloth_metadata['image_link']
-            #         link_url = cloth_metadata['link']
-            #         link = f'<a href="{link_url}" target="_blank"><img src="{img_url}" alt="Image" width="150" height="200"></a>'
-
-            #         cols[j].markdown(link, unsafe_allow_html=True)
                     
     else:
         st.header("로그인 후 이용해주세요.")
