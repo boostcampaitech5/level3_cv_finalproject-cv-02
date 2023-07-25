@@ -22,7 +22,8 @@ from meotandard_apis import MeotandardSeg, MeotandardRetrieval
 # 필요한 state 초기화
 MSS.init_session_state([("result", None),
                         ("segmented_img", None),
-                        ("segmented_byte_img", None)])
+                        ("segmented_byte_img", None),
+                        ("seg_select_state", False)])
 
 # Segmentation API 관련 메소드들이 정의되어있는 클래스 객체 생성
 meotandard_seg = MeotandardSeg()
@@ -30,6 +31,15 @@ meotandard_seg = MeotandardSeg()
 # Retrieval API 관련 메소드들이 정의되어있는 클래스 객체 생성
 meotandard_retrieval = MeotandardRetrieval()
 
+def chage_seg_select(state) :
+    if state :
+        # 상품 upload 페이지로 이동
+        MSS.change_session_state([("seg_select_state" , False)])         
+                        
+    else :
+        # 상품 검색 페이지로 이동
+        MSS.change_session_state([("seg_select_state" , True)])
+          
 
 if __name__ == "__main__":
     if st.session_state.authentication_status == True:
@@ -88,10 +98,12 @@ if __name__ == "__main__":
                         # 상품 검색 페이지에서 사용할 수 있도록 선택한 이미지를 session state에 등록 
                         # 검색할 때는 딱 맞게 잘려진 이미지를 사용함
                         MSS.change_session_state([('segmented_img', segmented_imgs[img_index]),
-                                                ('segmented_byte_img', segmented_byte_imgs[img_index])])
-
-                        # 상품 검색 페이지로 이동
-                        MSS.change_session_state([("seg_select_state" , True)])
+                                                ('segmented_byte_img', segmented_byte_imgs[img_index]), 
+                                                ('seg_select_state', True)])
+                        st.experimental_rerun()
+                        # # 상품 검색 페이지로 이동
+                        # chage_seg_select(st.session_state.seg_select_state)
+                        
         else :
             # switch_page("상품 검색")
             st.title(":tshirt: 상품 검색 서비스")
@@ -129,8 +141,10 @@ if __name__ == "__main__":
                         cols[j].markdown(link, unsafe_allow_html=True)   
             # 다시 seg로 돌아가기
             if st.button("다른 사진 업로드하기"):
-                        # 상품 검색 페이지로 이동
-                        MSS.change_session_state([("seg_select_state" , False)])
+                        # 상품 upload 페이지로 이동
+                        MSS.change_session_state([('seg_select_state', False)])
+                        st.experimental_rerun()
+                        
 
     else:
         st.header("로그인 후 이용해주세요.")
