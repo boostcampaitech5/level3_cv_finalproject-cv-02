@@ -4,5 +4,7 @@ __pycache__
 # frontend
 frontend/accounts.yaml
 frontend/api_address.yaml
+frontend_dev/accounts.yaml
+frontend_dev/api_address.yaml
 
 # backend
