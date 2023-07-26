@@ -8,10 +8,7 @@ from streamlit_image_coordinates import streamlit_image_coordinates
 from PIL import Image
 
 # built-in library
-import requests
-import os.path as osp
 import io
-import base64
 
 # custom-modules
 from utils.management import ManageSessionState as MSS
@@ -19,9 +16,8 @@ from meotandard_apis import MeotandardSeg
 
 
 # 필요한 state 초기화
-MSS.init_session_state([("result", None),
-                        ("segmented_img", None),
-                        ("segmented_byte_img", None)])
+MSS.init_session_state([("seg_data", {"uploaded_img": None, "coordinates": None}),
+                        ("segmented_img", None), ("segmented_byte_img", None)])
 
 # Segmentation API 관련 메소드들이 정의되어있는 클래스 객체 생성
 meotandard_seg = MeotandardSeg()
@@ -38,6 +34,8 @@ if __name__ == "__main__":
 
         # 사용자가 파일을 업로드했다면
         if uploaded_img is not None:
+            # uploaded_img를 session state에 등록(페이지)
+
             # TODO: 마크다운 꾸미기
             st.markdown("""
                         업로드한 이미지에서 검색하고 싶은 상품의 위치를 마우스:mouse:로 클릭해주세요!\n
@@ -54,7 +52,6 @@ if __name__ == "__main__":
             if img_w > 1000 or img_h > 1000:
                 img = img.resize((700, 1000))
             
-            # TODO: 좌표 찍을 때 위치를 이미지 위에 그릴 수 있는 것으로 보임 (https://github.com/blackary/streamlit-image-coordinates/blob/main/pages/dynamic_update.py)
             # 좌표 설정
             coordinates = streamlit_image_coordinates(
                 img,
@@ -77,7 +74,7 @@ if __name__ == "__main__":
                 # image select로 보여줄 때는 padding된 이미지로
                 img_index = image_select("선택해주세요!", seg_and_pad_imgs, return_value='index')
 
-                # TODO: 버튼을 클릭하지 않았을 때 페이지 전체가 다시 렌더링되는 것을 막기(기존 정보가 유지되도록)
+                # TODO: 
                 # 선택을 확정지으면
                 if st.button("이걸로 검색하시겠어요?"):
                     # 상품 검색 페이지에서 사용할 수 있도록 선택한 이미지를 session state에 등록 
@@ -90,5 +87,3 @@ if __name__ == "__main__":
 
     else:
         st.header("로그인 후 이용해주세요.")
-
-    

@@ -2,7 +2,6 @@ __pycache__
 .empty
 
 # frontend
-frontend/viton_test.py
 frontend/accounts.yaml
 frontend/api_address.yaml
 

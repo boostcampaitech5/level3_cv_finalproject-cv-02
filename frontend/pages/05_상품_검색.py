@@ -17,7 +17,8 @@ from datas.cloth import SearchedCloth
 
 # 필요한 session state 초기화
 MSS.init_session_state([('counter', 0),
-                        ('searched_cloth', list())])
+                        ('searched_cloth', list()),
+                        ('tryon_cloth', None)])
 
 
 # Retrieval API 관련 메소드들이 정의되어있는 클래스 객체 생성
@@ -36,7 +37,7 @@ if __name__ == "__main__":
         # TODO: text 사용하고 싶지 않은 경우 search-by-image api를 호출하도록 코드 작성
         # TODO: 색상을 어떻게 입력받을지 얘기해보고 정하기
         # 상품 검색에 활용할 text 입력
-        text = st.text_input("상품 검색에 사용할 옷의 색상 정보를 영어로 입력해주세요!")
+        text = st.text_input("상품 검색에 사용할 옷의 색상 정보를 입력해주세요!")
 
         if text:
             # threshold는 default == 0.0
@@ -70,6 +71,7 @@ if __name__ == "__main__":
                 with col1: st.button("저장", use_container_width=True)
                 with col2:
                     if st.button("입어보기", use_container_width=True):
+                        MSS.change_session_state([('tryon_cloth', cloth.img_link)])
                         switch_page("가상 피팅")
 
                 with container.container():
