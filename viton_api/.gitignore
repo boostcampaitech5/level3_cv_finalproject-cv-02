@@ -1,0 +1,19 @@
+# 불필요
+__pycache__
+.ipynb_checkpoints
+
+# 프론트엔드
+frontend/.empty
+
+# 백엔드
+backend/detectron2
+backend/infra/preprocess/TRACER/
+backend/infra/viton/HR-VITON/
+backend/.empty
+backend/infra/viton/hr_viton/eval_models/*
+backend/infra/viton/ladi_viton/src/fashion-clip/
+backend/infra/preprocess/pose_estimation/openpose-pytorch/*
+backend/infra/preprocess/human_parser/cihp_pgn/checkpoint/*
+backend/infra/preprocess/human_parser/schp/pretrained/*
+
+backend/infra/viton/ladi_viton/src/ladi_vton_fashion_clip.py
