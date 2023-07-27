@@ -16,23 +16,29 @@ from utils.management import ManageSessionState as MSS
 from meotandard_apis import MeotandardSeg, MeotandardRetrieval
 from utils.open import open_page
 
-# 필요한 session state 초기화
+# seg 관련 session state 초기화
 MSS.init_session_state([("segmented_img", None),
                         ("segmented_byte_img", None),
                         ("seg_select_state", False)])
 
-# 필요한 session state 초기화
-MSS.init_session_state([('selected', None),
-                        ('clothes_metadata', None)])
+# 검색 관련 session state 초기화
+MSS.init_session_state([('selected', None), ('counter', 0),
+                        ('text_before', ''), ('tryon_cloth_data', None),
+                        ('choose_idx', None), ('clothes_metadata', None)])
 
-# 필요한 session state 초기화
-MSS.init_session_state([('counter', 0),
-                        ('searched_cloth', list()),
-                        ('tryon_cloth', None),
-                        ('choose_idx', None)])
-
+# Seg, Retrieval API 클래스 정의
 meotandard_seg = MeotandardSeg()
 meotandard_retrieval = MeotandardRetrieval()
+
+# css
+bg_container = """
+<style>
+[data-testid="stVerticalBlock"]
+[class="css-1n76uvr e1f1d6gn0"]{
+background-color: whitesmoke;
+}
+</style>
+"""
 
 
 def seg():
@@ -94,6 +100,11 @@ def retrieval(mode: str = 'image'):
         text = st.text_input("텍스트를 입력해주세요.")
 
         if text:
+            # 새로운 text가 입력되었다면
+            if text != st.session_state.text_before:
+                st.session_state.text_before = text
+                MSS.change_session_state([('counter', 0)])
+
             translation_result, clothes_metadata = meotandard_retrieval.querying_searchbytext_api(text)
             MSS.change_session_state([('clothes_metadata', clothes_metadata)])
 
@@ -108,14 +119,17 @@ def retrieval(mode: str = 'image'):
         text = st.text_input("텍스트를 입력해주세요.")
 
         if text:
-            clothes_metadata = meotandard_retrieval.querying_searchbyfilter_api(st.session_state.segmented_byte_img, text)
+            translation_result, clothes_metadata = meotandard_retrieval.querying_searchbyfilter_api(st.session_state.segmented_byte_img, text)
+            
+            st.write(f"번역 결과입니다: {translation_result}")
             MSS.change_session_state([('clothes_metadata', clothes_metadata)])
+
 
     if st.session_state.clothes_metadata:
         st.header("상품 검색 결과입니다! :airplane_departure:")
         st.markdown('---')
-
-        n_clothes = len(clothes_metadata)
+        
+        n_clothes = len(st.session_state.clothes_metadata)
         
         for i in range(2):
             cols = st.columns(5)
@@ -127,11 +141,12 @@ def retrieval(mode: str = 'image'):
                 else:
                     idx = (10 * st.session_state.counter) + (i * 5) + j
 
-                meta_data = clothes_metadata[idx]
+                meta_data = st.session_state.clothes_metadata[idx]
                 
                 image_url = meta_data['image_link']
                 link_url = meta_data['link']
 
+                # with cols[j]: st.image(image_url, use_column_width=True)
                 cols[j].write(f'<img src="{image_url}" alt="Image" width="126" height="168">', unsafe_allow_html=True)
 
                 if cols[j].button(f"{idx + 1}번 상품", key=idx, use_container_width=True):
@@ -139,31 +154,39 @@ def retrieval(mode: str = 'image'):
 
         # 이미지를 선택했다면
         if  st.session_state['choose_idx'] is not None:
-            choose_data = clothes_metadata[st.session_state['choose_idx']]
+            choose_data = st.session_state.clothes_metadata[st.session_state['choose_idx']]
 
+            container = st.container()
+            st.markdown(bg_container, unsafe_allow_html=True)
+            with container.container():
+                col1, col2 = st.columns(2)
+                with col1: st.markdown(f"**{st.session_state['choose_idx'] + 1}번 상품명**  \n{choose_data['name']}")
+                with col2: st.markdown(f"**가격**  \n{choose_data['price']}")
+                
+                if choose_data['meta'] == "0":
+                    st.write("")
+                else:
+                    # "[]", ",", "''" 제거
+                    st.write(choose_data["meta"][1:-1].replace("'", "").replace(",", ""))
+                
             col1, col2 = st.columns(2)
-            with col1: st.markdown(f"**{st.session_state['choose_idx'] + 1}번 상품명**  \n{choose_data['name']}")
-            with col2: st.markdown(f"**가격**  \n{choose_data['price']}")
-            
-            if choose_data['meta'] == "0":
-                st.write("")
-            else:
-                st.write(choose_data['meta'])
-            
-            col1, col2 = st.columns(2)
-            col1.button("상품 사이트", on_click=open_page, args=(link_url,), use_container_width=True)
-            if col2.button("입어보기!", use_container_width=True):    
-                switch_page("가상 피팅")
+            col1.button("상품 사이트", on_click=open_page, args=(choose_data['link'],), use_container_width=True)
+            if col2.button("입어보기!", use_container_width=True):
+                if choose_data['check'] == 0:
+                    st.warning("상품 사진에 사람이 있거나 여러 장의 옷이 있는 경우 입어볼 수 없어요 :cry:")
+                else:                
+                    MSS.change_session_state([('tryon_cloth_data', choose_data)])
+                    switch_page("가상 피팅")
 
             col1.button("⬅️ 이전", on_click=prev, use_container_width=True)
             col2.button("다음 ➡️", on_click=next, use_container_width=True)
 
     # 다시 seg로 돌아가기
-    button_name = "다른 텍스트 입력하기" if mode == "text" else "다른 사진 업로드하기"
-    if st.button(button_name, use_container_width=True):
-        # 상품 upload 페이지로 이동
-        MSS.change_session_state([('seg_select_state', False)])
-        st.experimental_rerun()    
+    if mode != "text":
+        if st.button("다른 사진 업로드하기", use_container_width=True):
+            # 상품 upload 페이지로 이동
+            MSS.change_session_state([('seg_select_state', False)])
+            st.experimental_rerun()    
 
 
 def image_retrieval():

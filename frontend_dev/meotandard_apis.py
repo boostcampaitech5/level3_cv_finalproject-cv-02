@@ -95,10 +95,10 @@ class MeotandardRetrieval(Meotandard):
         # files와 form_data를 기반으로 proxy/search-by-filter에 검색 요청
         response = requests.post(f"{_self.retrieval_api_address}/proxy/search-by-filter", files=files, data=form_data)
 
-        # 상품목록에 담겨 있는 metadata를 반환
+        translation_result = response.json()["번역결과"]
         clothes_metadata = response.json()["상품목록"]
 
-        return clothes_metadata
+        return translation_result, clothes_metadata
     
     @st.cache_data
     def querying_searchbyimage_api(_self, img_bytes: bytes, threshold: float = 0.0):
