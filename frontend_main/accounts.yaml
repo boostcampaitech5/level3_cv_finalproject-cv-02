@@ -1,0 +1,21 @@
+cookie:
+  expiry_days: 30
+  key: random_signature_key
+  name: random_cookie_name
+credentials:
+  usernames:
+    noname:
+      email: noname@gmail.com
+      name: No Name
+      password: $2b$12$4LM6Q7TnH4PaN/amrNJ/Uu1sVipMwY4AQp//3MhZeLM7B6lNwHszu
+    test01:
+      email: test@test.com
+      name: test01
+      password: $2b$12$.9Exp0hdupWMv0sZIR5IVeKY3RhDGhwSnoV/3CtO73Qw4phtgvkZa
+    test03:
+      email: test03@test.com
+      name: test03
+      password: $2b$12$LZKg6.Ci6QLLt9jyBC3d1eKO5pnr8fqH1iB4TaSuE01cfOEH3goNe
+preauthorized:
+  emails:
+  - melsby@gmail.com
