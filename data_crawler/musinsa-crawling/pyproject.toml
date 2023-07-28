@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "musinsa-crawling"
+version = "0.1.0"
+description = ""
+authors = ["wjdghcks6735 <wjdghcks02@gmail.com>"]
+readme = "README.md"
+packages = [{include = "musinsa_crawling", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+beautifulsoup4 = "^4.12.2"
+requests = "^2.31.0"
+selenium = "^4.10.0"
+pandas = "^2.0.2"
+torch = "^2.0.1"
+lxml = "^4.9.2"
+urllib3 = "^2.0.3"
+tqdm = "^4.65.0"
+progressbar = "^2.5"
+parmap = "^1.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
