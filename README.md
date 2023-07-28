@@ -2,6 +2,8 @@
 > 소셜 미디어 플랫폼에서 발견한 옷에 대한 정보 부재와 온라인에서의 스타일 판단 어려움을 해결하기 위한 서비스
 >   > 개발 기간 : 2023.07.01~ 2023.07.27
 
+:loudspeaker: 아래 이미지를 클릭해서 demo 영상을 볼 수 있습니다. 
+
 [![Video Label](https://img.youtube.com/vi/b6DO6gwo4Q0/0.jpg)](https://youtu.be/b6DO6gwo4Q0)
 
 <br><br>
