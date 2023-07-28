@@ -3,6 +3,7 @@
 >   > 개발 기간 : 2023.07.01~ 2023.07.27
 
 [![Video Label](https://img.youtube.com/vi/b6DO6gwo4Q0/0.jpg)](https://youtu.be/b6DO6gwo4Q0)
+
 <br><br>
 
 ### :zap: 팀 멋쟁이
@@ -53,8 +54,9 @@
 
 **:white_check_mark: 가상 피팅 기능** : 의류 정보를 찾았으면 가상 피팅 기능을 통해 나에게 어울릴지를 판단해 볼 수 있습니다. 
 
-> 자세한 기능과 Tech 설명은 ['링크'](https://bottlenose-oak-2e3.notion.site/e2ca44b0357f4c39a61490592450576a?pvs=4)에서 확인하실 수 있습니다.  
+> 자세한 기능과 Tech 설명은 ['링크'](https://bottlenose-oak-2e3.notion.site/e2ca44b0357f4c39a61490592450576a?pvs=4)에서 확인하실 수 있습니다.
 
+<br><br>
 
 ### :file_folder: 폴더 구조 
 - - -
