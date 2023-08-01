@@ -31,7 +31,7 @@ class MeotandardSeg(Meotandard):
     def __init__(self):
         super(MeotandardSeg, self).__init__()
     
-    @st.cache_data
+    @st.cache_data(show_spinner="검색에 필요한 상품 정보를 찾는 중입니다...")
     def querying_seg_api(_self, img_bytes: bytes, coordinates: dict) -> tuple:
         """img_bytes, coordinates를 기반으로 segmentation api를 호출할 때 사용하는 함수입니다.
         st.cache_data를 이용하여 동일한 img_bytes와 coordinates 값이 들어오면 cache에 저장해둔
@@ -77,7 +77,7 @@ class MeotandardRetrieval(Meotandard):
     def __init__(self):
         super(MeotandardRetrieval, self).__init__()
     
-    @st.cache_data
+    @st.cache_data(show_spinner="이미지와 텍스트를 활용하여 상품 정보를 검색중입니다...")
     def querying_searchbyfilter_api(_self, img_bytes: bytes, text: str, threshold: float = 0.0) -> list:
         """img_bytes, text, threshold를 기반으로 image retrieval api를 호출할 때 사용하는 함수입니다.
 
@@ -100,7 +100,7 @@ class MeotandardRetrieval(Meotandard):
 
         return translation_result, clothes_metadata
     
-    @st.cache_data
+    @st.cache_data(show_spinner="이미지를 활용하여 상품 정보를 검색중입니다...")
     def querying_searchbyimage_api(_self, img_bytes: bytes, threshold: float = 0.0):
         files = {'file': img_bytes}
         form_data = {'thresh': threshold}
@@ -111,7 +111,7 @@ class MeotandardRetrieval(Meotandard):
 
         return clothes_metadata
 
-    @st.cache_data
+    @st.cache_data(show_spinner="텍스트를 활용하여 상품 정보를 검색중입니다...")
     def querying_searchbytext_api(_self, text: str, threshold: float = 0.0):
         form_data = {'thresh': threshold, 'text': text}
 
@@ -127,7 +127,7 @@ class MeotandardViton(Meotandard):
     def __init__(self):
         super(MeotandardViton, self).__init__()
 
-    @st.cache_data
+    @st.cache_data(show_spinner="이미지를 저장 중입니다...")
     def querying_saveimg_api(_self, img_bytes: bytes, mode: str = 'cloth') -> tuple:
         """img_bytes를 기반으로 생성 서버의 로컬 스토리지에 이미지 저장을 요청합니다.
 
@@ -145,7 +145,7 @@ class MeotandardViton(Meotandard):
 
         return (save_state, im_name)
 
-    @st.cache_data
+    @st.cache_data(show_spinner="의류 상품 이미지를 처리 중입니다...")
     def querying_ppcloth_api(_self, img_name: str) -> str:
         """생성 서버의 스토리지에 저장된 상품 이미지의 이름을 바탕으로 masking을 요청합니다.
 
@@ -160,7 +160,7 @@ class MeotandardViton(Meotandard):
 
         return response.text
     
-    @st.cache_data
+    @st.cache_data(show_spinner="가상 피팅에 활용할 정보들을 처리 중입니다...")
     def querying_ppperson_api(_self, img_name: str, model_name: str = 'ladi_viton') -> dict:
         """생성 서버의 스토리지에 저장된 사람 이미지의 이름을 바탕으로, 생성에 필요한
         모든 전처리를 요청합니다.
@@ -178,7 +178,7 @@ class MeotandardViton(Meotandard):
         
         return response.json()
     
-    @st.cache_data
+    @st.cache_data(show_spinner="가상 피팅을 진행중입니다, 잠시만 기다려주세요...")
     def querying_genvitonimg_api(_self, p_img_name: str, c_img_name: str, model_name: str = 'ladi_viton', category: str = 'upper_body'):
         """사람 이미지와 상품 이미지, 생성 모델의 이름을 가지고 viton api를 요청합니다.
 
