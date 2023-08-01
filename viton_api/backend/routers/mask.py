@@ -7,15 +7,15 @@ from infra.preprocess.masking.model import TracerB7
 
 
 router = APIRouter(
-    prefix="/masking",
-    tags=["masking"]
+    prefix="/mask",
+    tags=["mask"]
 )
 
 
 model = TracerB7()
 
 
-@router.post("")
+@router.post("/inference")
 def predict_mask(storage_root: str = Form(...), img_name: str = Form(...), mode: str = Form(...)) -> bool:
     """마스크를 예측할 때 사용하는 API입니다.
 

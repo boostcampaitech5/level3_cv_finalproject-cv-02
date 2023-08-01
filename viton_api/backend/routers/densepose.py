@@ -1,4 +1,5 @@
 # fastapi
+from fastapi import Form
 from fastapi import APIRouter
 
 # built-in library
@@ -13,8 +14,8 @@ router = APIRouter(
 )
 
 
-@router.get("")
-def densepose_estimation(storage_root: str, img_name: str):
+@router.post("")
+def densepose_estimation(storage_root: Form(...), img_name: Form(...)):
     # det2 패키지로 동일한 결과를 출력하기 위해 일종의 치트를 사용
     os.chdir("/opt/ml/VIT-ON-Demo/backend/detectron2/projects/DensePose")
 

@@ -41,22 +41,22 @@ dense_pose_client = DensePoseClient()
 viton_client = VitOnClient()
 
 
-# TODO: API 요청이 올바르게 이루어졌는지 판단하는 state를 보다 논리적인 방법으로 바꾸기
-@router.post("/save")
-async def save_img(img: UploadFile = File(...), mode: str = Form(...)) -> dict:
+# TODO: 이미지 저장을 로컬 스토리지 말고 다른 곳에 저장할 수 있는지 확인해보기
+@router.post("/images/{category}")
+async def save_images(category: str, img: UploadFile = File(...)) -> dict:
     """서버의 로컬 스토리지에 png 형식으로 이미지를 저장할 때 사용하는 API입니다.
 
     Args:
+        category (str, optional): category에 따라 데이터를 다르게 읽습니다. Defaults to Form(...).
         img (UploadFile, optional): 이미지 데이터입니다. Defaults to File(...).
-        mode (str, optional): mode에 따라 데이터를 다르게 읽습니다. Defaults to Form(...).
 
     Returns:
         dict: 저장 상태를 나타내는 state와, 저장 시 사용했던 이미지의 이름입니다.
     """
-    if mode == 'cloth':
+    if category == 'clothes':
         file_content = await img.read()
         im = Image.open(io.BytesIO(file_content))
-    elif mode == 'person':
+    elif category == 'person':
         im = Image.open(img.file)
     else:
         print('Available mode: cloth, person')
@@ -89,7 +89,6 @@ async def pp_cloth(img_name: str = Form(...)) -> str:
     return save_state
 
 
-# TODO: hr-viton과 ladi-vton이 사용하는 human parser가 다른 환경, 다른 모델임 -> 조건에 따라 요청하도록 수정
 @router.post("/preprocess/person")
 async def pp_person(img_name: str = Form(...), model_name: str = Form(...)) -> dict:
     """서버의 로컬 스토리지에 저장되어있는 사람 이미지의 이름을 바탕으로
@@ -119,7 +118,6 @@ async def pp_person(img_name: str = Form(...), model_name: str = Form(...)) -> d
             "mask": mask_save_state, "pose img & kpts": pose_save_state}
 
 
-# TODO: category에 따라 사용하는 weights가 다른 ladi 모델을 backend에서 어떻게 사용할지 고민해보기
 @router.post("/generate")
 async def gen_viton_img(p_img_name: str = Form(...), c_img_name: str = Form(...),
                         model_name: str = Form(...), category: str = Form(...)):

@@ -18,7 +18,6 @@ router = APIRouter(
 
 ladi_vton = LadiVton()
 
-
 # @router.post("/hr_viton")
 # def hr_inference(storage_root: str, p_img_name: str, c_img_name: str):
 #     img_name = inference(storage_root, p_img_name, c_img_name)
