@@ -41,19 +41,19 @@ dense_pose_client = DensePoseClient()
 viton_client = VitOnClient()
 
 
-# TODO: 이미지 저장을 로컬 스토리지 말고 다른 곳에 저장할 수 있는지 확인해보기
-@router.post("/images/{category}")
-async def save_images(category: str, img: UploadFile = File(...)) -> dict:
+# TODO: 이미지 저장을 로컬 스토리지 말고 다른 곳에 저장할 수 있는지 찾아보기
+@router.post("/images")
+async def save_images(img: UploadFile = File(...), category: str = Form(...)) -> dict:
     """서버의 로컬 스토리지에 png 형식으로 이미지를 저장할 때 사용하는 API입니다.
 
     Args:
-        category (str, optional): category에 따라 데이터를 다르게 읽습니다. Defaults to Form(...).
         img (UploadFile, optional): 이미지 데이터입니다. Defaults to File(...).
+        category (str, optional): category에 따라 데이터를 다르게 읽습니다. Defaults to Form(...).
 
     Returns:
         dict: 저장 상태를 나타내는 state와, 저장 시 사용했던 이미지의 이름입니다.
     """
-    if category == 'clothes':
+    if category == 'cloth':
         file_content = await img.read()
         im = Image.open(io.BytesIO(file_content))
     elif category == 'person':
@@ -63,7 +63,7 @@ async def save_images(category: str, img: UploadFile = File(...)) -> dict:
         raise
     
     im_name = str(uuid.uuid4()) + '.png'
-    im_path = osp.join(configs['storage'], f'raw_data/{mode}', im_name)
+    im_path = osp.join(configs['storage'], f'raw_data/{category}', im_name)
     im.save(im_path, 'PNG')
 
     save_state = False
@@ -84,7 +84,7 @@ async def pp_cloth(img_name: str = Form(...)) -> str:
     Returns:
         str : 저장 상태를 나타내는 state를 반환합니다.
     """
-    save_state = await mask_client.predict_mask(configs['storage'], img_name, mode='cloth')
+    save_state = await mask_client.predict_mask(configs['storage'], img_name, category='cloth')
 
     return save_state
 
@@ -109,7 +109,7 @@ async def pp_person(img_name: str = Form(...), model_name: str = Form(...)) -> d
     else:
         dense_pose_save_state = False
 
-    mask_save_state = await mask_client.predict_mask(configs['storage'], img_name, mode='person')
+    mask_save_state = await mask_client.predict_mask(configs['storage'], img_name, category='person')
 
     if mask_save_state:
         pose_save_state = await pose_estimation_client.predict_pose_kpts(configs['storage'], img_name, model_name)

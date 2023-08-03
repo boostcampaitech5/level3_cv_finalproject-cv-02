@@ -626,7 +626,6 @@ class StableDiffusionTryOnePipeline(DiffusionPipeline):
             prompt_embeds=prompt_embeds,
             negative_prompt_embeds=negative_prompt_embeds,
         )
-        print(f"Inside ladi pipeline, prompt_embeds: {prompt_embeds.shape}")
 
         # 4. Preprocess mask, image and posemap
         mask, masked_image = prepare_mask_and_masked_image(image, mask_image)

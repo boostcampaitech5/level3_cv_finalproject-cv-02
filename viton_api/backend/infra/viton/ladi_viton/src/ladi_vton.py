@@ -284,9 +284,7 @@ class LadiVton():
                                                                    np.logical_not(
                                                                        np.array(parse_head_2, dtype=np.uint16))))
 
-            # parse_mask = cv2.dilate(parse_mask, np.ones((10,10), np.uint16), iterations=5)
-            parse_mask = cv2.dilate(parse_mask, np.ones((5,5), np.uint16), iterations=5)
-            # parse_mask = cv2.erode(parse_mask, np.ones((1,1), np.uint16), iterations=1)
+            parse_mask = cv2.dilate(parse_mask, np.ones((7,7), np.uint16), iterations=5)
 
             parse_mask = np.logical_and(parser_mask_changeable, np.logical_not(parse_mask))
             parse_mask_total = np.logical_or(parse_mask, parser_mask_fixed)
@@ -317,19 +315,18 @@ class LadiVton():
         # Load scheduler, tokenizer and models.
         val_scheduler = DDIMScheduler.from_pretrained(self.args['pretrained_model_name_or_path'], subfolder="scheduler")
         val_scheduler.set_timesteps(50, device=self.device)
-        self.text_encoder = CLIPTextModel.from_pretrained(self.args['pretrained_model_name_or_path'], subfolder="text_encoder")
+        text_encoder = CLIPTextModel.from_pretrained(self.args['pretrained_model_name_or_path'], subfolder="text_encoder")
         vae = AutoencoderKL.from_pretrained(self.args['pretrained_model_name_or_path'], subfolder="vae")
-        self.vision_encoder = CLIPVisionModelWithProjection.from_pretrained("laion/CLIP-ViT-H-14-laion2B-s32B-b79K")
-        self.processor = AutoProcessor.from_pretrained("laion/CLIP-ViT-H-14-laion2B-s32B-b79K")
-        self.tokenizer = CLIPTokenizer.from_pretrained(self.args['pretrained_model_name_or_path'], subfolder="tokenizer")
-
+        vision_encoder = CLIPVisionModelWithProjection.from_pretrained("laion/CLIP-ViT-H-14-laion2B-s32B-b79K")
+        processor = AutoProcessor.from_pretrained("laion/CLIP-ViT-H-14-laion2B-s32B-b79K")
+        tokenizer = CLIPTokenizer.from_pretrained(self.args['pretrained_model_name_or_path'], subfolder="tokenizer")
+        
         
         PRETRAINED = {'upper_body':'vitonhd', 'lower_body':'dresscode'} #카테고리에 따라 가중치 설정
         unet = torch.hub.load(repo_or_dir='miccunifi/ladi-vton', source='github', model='extended_unet', dataset=PRETRAINED[f'{category}'])
         emasc = torch.hub.load(repo_or_dir='miccunifi/ladi-vton', source='github', model='emasc', dataset=PRETRAINED[f'{category}'])
-        self.inversion_adapter = torch.hub.load(repo_or_dir='miccunifi/ladi-vton', source='github', model='inversion_adapter', dataset=PRETRAINED[f'{category}'])
-        self.tps, self.refinement = torch.hub.load(repo_or_dir='miccunifi/ladi-vton', source='github', model='warping_module', dataset=PRETRAINED[f'{category}'])
-    
+        inversion_adapter = torch.hub.load(repo_or_dir='miccunifi/ladi-vton', source='github', model='inversion_adapter', dataset=PRETRAINED[f'{category}'])
+        tps, refinement = torch.hub.load(repo_or_dir='miccunifi/ladi-vton', source='github', model='warping_module', dataset=PRETRAINED[f'{category}'])
 
         int_layers = [1, 2, 3, 4, 5]
 
@@ -343,37 +340,42 @@ class LadiVton():
         # cast to weight_dtype 
         self.weight_dtype = torch.float32
 
-        self.text_encoder.to(self.device, dtype=self.weight_dtype)
+        text_encoder.to(self.device, dtype=self.weight_dtype)
         vae.to(self.device, dtype=self.weight_dtype)
         emasc.to(self.device, dtype=self.weight_dtype)
-        self.inversion_adapter.to(self.device, dtype=self.weight_dtype)
+        inversion_adapter.to(self.device, dtype=self.weight_dtype)
         unet.to(self.device, dtype=self.weight_dtype)
-        self.tps.to(self.device, dtype=self.weight_dtype)
-        self.refinement.to(self.device, dtype=self.weight_dtype)
-        self.vision_encoder.to(self.device, dtype=self.weight_dtype)
+        tps.to(self.device, dtype=self.weight_dtype)
+        refinement.to(self.device, dtype=self.weight_dtype)
+        vision_encoder.to(self.device, dtype=self.weight_dtype)
 
         # set to eval
-        self.text_encoder.eval()
+        text_encoder.eval()
         vae.eval()
         emasc.eval()
-        self.inversion_adapter.eval()
+        inversion_adapter.eval()
         unet.eval()
-        self.tps.eval()
-        self.refinement.eval()
-        self.vision_encoder.eval()
+        tps.eval()
+        refinement.eval()
+        vision_encoder.eval()
 
         # Create the pipeline
         val_pipe = StableDiffusionTryOnePipeline(
-            text_encoder=self.text_encoder,
+            text_encoder=text_encoder,
             vae=vae,
-            tokenizer=self.tokenizer,
+            tokenizer=tokenizer,
             unet=unet,
             scheduler=val_scheduler,
             emasc=emasc,
             emasc_int_layers=int_layers,
         ).to(self.device)
 
-        return val_pipe
+        models = {'text_encoder': text_encoder, 'vision_encoder':vision_encoder,
+                  'processor': processor, 'tokenizer': tokenizer,
+                  'inversion_adapter': inversion_adapter,'tps': tps,
+                  'refinement': refinement, 'val_pipe':val_pipe}
+        
+        return models
         
         
     def inference(self, storage_root: str, p_img_name: str, c_img_name: str, category: str):
@@ -398,16 +400,21 @@ class LadiVton():
         # 전처리한 데이터 
         batch = self.data_preprocessing(data_name=data_name)
         
-        # category에 따라 val_pipe를 설정
+        # category에 따라 사용할 모델을 지정
         if category == "upper_body":
-            val_pipe = self.upper_model
+            model = self.upper_model
             print("upper model이 선택되었습니다.")
         elif category == "lower_body":
-            val_pipe = self.lower_model
+            model = self.lower_model
             print("lower model이 선택되었습니다.")
         else:
             print("Wrong category: category is one of the [upper_body, lower_body]")
             raise
+
+        text_encoder, vision_encoder = model['text_encoder'], model['vision_encoder'], 
+        processor, tokenizer = model['processor'], model['tokenizer']
+        inversion_adapter, tps = model['inversion_adapter'], model['tps']
+        refinement, val_pipe = model['refinement'], model['val_pipe']
 
         # 난수 생성
         generator = torch.Generator("cuda").manual_seed(self.args['seed'])
@@ -433,7 +440,7 @@ class LadiVton():
                                                                 torchvision.transforms.InterpolationMode.BILINEAR,
                                                                 antialias=True)
         agnostic = torch.cat([low_im_mask, low_pose_map], 1)
-        low_grid, theta, rx, ry, cx, cy, rg, cg = self.tps(low_cloth, agnostic)
+        low_grid, theta, rx, ry, cx, cy, rg, cg = tps(low_cloth, agnostic)
 
         # We upsample the grid to the original image size and warp the cloth using the predicted TPS parameters
         highres_grid = torchvision.transforms.functional.resize(low_grid.permute(0, 3, 1, 2),
@@ -445,20 +452,20 @@ class LadiVton():
 
         # Refine the warped cloth using the refinement network
         warped_cloth = torch.cat([im_mask, pose_map, warped_cloth], 1)
-        warped_cloth = self.refinement(warped_cloth)
+        warped_cloth = refinement(warped_cloth)
         warped_cloth = warped_cloth.clamp(-1, 1)
 
         # Get the visual features of the in-shop cloths
         input_image = torchvision.transforms.functional.resize((cloth + 1) / 2, (224, 224),
                                                                antialias=True).clamp(0, 1)
-        processed_images = self.processor(images=input_image, return_tensors="pt")
-        clip_cloth_features = self.vision_encoder(
+        processed_images = processor(images=input_image, return_tensors="pt")
+        clip_cloth_features = vision_encoder(
             processed_images.pixel_values.to(model_img.device, dtype=self.weight_dtype)).last_hidden_state
 
         ## TPS - 와핑 끝
 
         # Compute the predicted PTEs
-        word_embeddings = self.inversion_adapter(clip_cloth_features.to(model_img.device))
+        word_embeddings = inversion_adapter(clip_cloth_features.to(model_img.device))
         word_embeddings = word_embeddings.reshape((word_embeddings.shape[0], self.args['num_vstar'], -1))
 
         category_text = {
@@ -466,17 +473,16 @@ class LadiVton():
             'lower_body': 'a lower body garment',
         }
         num_vstar = self.args['num_vstar']
-        text = [f'a photo of a model wearing {category_text[category]} {" $ " * num_vstar}' for
-        category in [batch['category']]]
+        text = [f'a photo of a model wearing {category_text[category]} {" $ " * num_vstar}' for category in [batch['category']]]
 
        # Tokenize text
-        tokenized_text = self.tokenizer(text, max_length=self.tokenizer.model_max_length, padding="max_length",
+        tokenized_text = tokenizer(text, max_length=tokenizer.model_max_length, padding="max_length",
                                    truncation=True, return_tensors="pt").input_ids
         tokenized_text = tokenized_text.to(word_embeddings.device)
 
         # Encode the text using the PTEs extracted from the in-shop cloths
-        encoder_hidden_states = encode_text_word_embedding(self.text_encoder, tokenized_text,
-                                                           word_embeddings,self.args['num_vstar']).last_hidden_state
+        encoder_hidden_states = encode_text_word_embedding(text_encoder, tokenized_text,
+                                                           word_embeddings, self.args['num_vstar']).last_hidden_state
 
         # Generate images
         generated_images = val_pipe(

@@ -128,18 +128,19 @@ class MeotandardViton(Meotandard):
         super(MeotandardViton, self).__init__()
 
     @st.cache_data(show_spinner="이미지를 저장 중입니다...")
-    def querying_saveimg_api(_self, img_bytes: bytes, mode: str = 'cloth') -> tuple:
+    def querying_saveimages_api(_self, img_bytes: bytes, category: str = 'cloth') -> tuple:
         """img_bytes를 기반으로 생성 서버의 로컬 스토리지에 이미지 저장을 요청합니다.
 
         Args:
             img_bytes (bytes): bytes 형식의 사람 혹은 상품 데이터입니다.
+            category (str): 데이터가 사람인지 상품인지를 나타냅니다.
 
         Returns:
             tuple: 데이터가 올바르게 저장되었는지를 나타내는 상태와 이미지의 이름을 반환합니다.
         """
         files = {"img": img_bytes}
-        data = {"mode": mode}
-        response = requests.post(url=f"{_self.viton_api_adrress}/proxy/save", files=files, data=data)
+        data = {"category": category}
+        response = requests.post(url=f"{_self.viton_api_adrress}/proxy/images", files=files, data=data)
         
         save_state, im_name = response.json()['save_state'], response.json()['im_name']
 
