@@ -12,7 +12,8 @@ class DensePoseClient:
                 'img_name': img_name
             }
             response = await client.post(
-                f"{self.API_URL}?storage_root={storage_root}&img_name={img_name}",
+                url=self.API_URL,
+                data=data,
                 timeout=None
             )
 
